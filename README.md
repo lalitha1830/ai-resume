@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🍃 ResumeAI — AI-Powered Resume Analyzer
 
 > Upload your resume. Paste a job description. Get instant, personalized AI insights.
@@ -373,3 +374,6 @@ MIT License — free for personal and educational use.
 ---
 
 *Built with ❤️ using Python, Flask, and Google Gemini.*
+=======
+# ai-resume
+>>>>>>> b0e0a730771da494f3061d4de309df2f5f598793
