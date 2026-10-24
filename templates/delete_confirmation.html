@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Delete Analysis{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+
+  <aside class="sidebar" aria-label="Application navigation">
+    <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">
+      <div class="brand-icon" aria-hidden="true">🍃</div>
+      ResumeAI
+    </a>
+    <nav class="sidebar-nav" aria-label="Main menu">
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.dashboard') }}" class="sidebar-link"><span class="icon" aria-hidden="true">🏠</span> Dashboard</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('analysis.new_analysis') }}" class="sidebar-link"><span class="icon" aria-hidden="true">✚</span> New Analysis</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.history') }}" class="sidebar-link active"><span class="icon" aria-hidden="true">🕐</span> History</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.profile') }}" class="sidebar-link"><span class="icon" aria-hidden="true">👤</span> Profile</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-help">
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm" style="width:100%;color:var(--error);">Sign Out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>Delete Analysis</h1>
+        <p>This action cannot be undone.</p>
+      </div>
+      <div class="topbar-user">
+        <div class="user-avatar" title="{{ current_user.full_name }}">{{ current_user.first_name[0].upper() }}</div>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div style="max-width:520px;">
+
+        <div class="card" style="border:1.5px solid var(--error); background:var(--error-bg);">
+          <div style="font-size:2rem; margin-bottom:1rem;" aria-hidden="true">🗑</div>
+
+          <h2 style="font-size:1.2rem; color:var(--text-primary); margin-bottom:0.5rem;">
+            Delete this analysis?
+          </h2>
+
+          <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1.25rem;">
+            You are about to permanently delete:
+            <strong style="color:var(--text-primary);">{{ analysis.display_title }}</strong>
+            ({{ analysis.formatted_date }}).
+            This cannot be undone.
+          </p>
+
+          {# Confirm delete — POST with CSRF token #}
+          <form method="POST"
+                action="{{ url_for('analysis.delete_analysis', analysis_id=analysis.id) }}"
+                style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="btn btn-danger" id="confirm-delete-btn">
+              Yes, Delete This Analysis
+            </button>
+          </form>
+
+          <a href="{{ url_for('analysis.view_analysis', analysis_id=analysis.id) }}"
+             class="btn btn-outline"
+             style="margin-left:0.75rem;">
+            Cancel
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

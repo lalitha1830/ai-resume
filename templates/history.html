@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Analysis History{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+
+  <aside class="sidebar" aria-label="Application navigation">
+    <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">
+      <div class="brand-icon" aria-hidden="true">🍃</div>
+      ResumeAI
+    </a>
+    <nav class="sidebar-nav" aria-label="Main menu">
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.dashboard') }}" class="sidebar-link"><span class="icon" aria-hidden="true">🏠</span> Dashboard</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('analysis.new_analysis') }}" class="sidebar-link"><span class="icon" aria-hidden="true">✚</span> New Analysis</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.history') }}" class="sidebar-link active"><span class="icon" aria-hidden="true">🕐</span> History</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.profile') }}" class="sidebar-link"><span class="icon" aria-hidden="true">👤</span> Profile</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-help">
+        <p><strong>Need help?</strong></p>
+        <p>Check the README for tips.</p>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm" style="margin-top:0.5rem;width:100%;color:var(--error);">Sign Out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>Analysis History</h1>
+        <p>All your previous resume analyses — newest first.</p>
+      </div>
+      <div class="topbar-user">
+        <div class="user-avatar" title="{{ current_user.full_name }}">{{ current_user.first_name[0].upper() }}</div>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Sign Out</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      {# Flash messages #}
+      {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+          <div role="alert" aria-live="polite" style="margin-bottom:1.25rem;">
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">
+                <span class="flash-icon">{% if category == 'success' %}✓{% elif category == 'error' %}✕{% else %}ℹ{% endif %}</span>
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+        <p style="color:var(--text-secondary); font-size:0.88rem; margin:0;">
+          {{ analyses|length }} analysis{% if analyses|length != 1 %}es{% endif %} found.
+        </p>
+        <a href="{{ url_for('analysis.new_analysis') }}" class="btn btn-primary btn-sm">+ New Analysis</a>
+      </div>
+
+      {% if analyses %}
+        <div class="analysis-table" role="region" aria-label="Analysis history">
+          {% for a in analyses %}
+            <div class="history-row">
+              <div>
+                <div class="analysis-title">{{ a.display_title }}</div>
+                {% if a.job_title and a.job_title != a.display_title %}
+                  <div class="analysis-date" style="color:var(--text-secondary); font-size:0.78rem;">
+                    {{ a.job_title }}
+                  </div>
+                {% endif %}
+                <div class="analysis-date">{{ a.formatted_date }}</div>
+              </div>
+
+              <div>
+                {% if a.match_score is not none %}
+                  <div class="score-pill {{ a.score_label }}" aria-label="Match score {{ a.match_score }}%">
+                    {{ a.match_score|int }}%
+                  </div>
+                {% else %}
+                  <div class="score-pill unknown">—</div>
+                {% endif %}
+              </div>
+
+              <div>
+                <a href="{{ url_for('analysis.view_analysis', analysis_id=a.id) }}"
+                   class="btn btn-outline btn-sm"
+                   aria-label="View results for {{ a.display_title }}">
+                  View →
+                </a>
+              </div>
+
+              <div>
+                <a href="{{ url_for('analysis.delete_analysis', analysis_id=a.id) }}"
+                   class="btn btn-danger btn-sm"
+                   aria-label="Delete analysis: {{ a.display_title }}">
+                  Delete
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+      {% else %}
+        <div class="empty-state card">
+          <div class="empty-state-icon" aria-hidden="true">📄</div>
+          <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">No analyses yet</h3>
+          <p>You haven't run any analyses yet.<br>Upload your resume to get started.</p>
+          <a href="{{ url_for('analysis.new_analysis') }}" class="btn btn-primary mt-3">
+            Start Your First Analysis
+          </a>
+        </div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+{% endblock %}

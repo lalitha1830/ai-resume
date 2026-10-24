@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}ResumeAI — Build a Better Resume with AI{% endblock %}
+{% block meta_description %}Upload your resume and a job description to discover your strengths, identify skill gaps, and get personalized improvement suggestions powered by AI.{% endblock %}
+
+{% block content %}
+
+{# ═══════════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════════ #}
+<nav class="navbar" aria-label="Main navigation">
+  <div class="navbar-inner">
+    <a href="{{ url_for('main.index') }}" class="navbar-brand">
+      <div class="brand-icon" aria-hidden="true">🍃</div>
+      ResumeAI
+    </a>
+
+    <div class="navbar-links" role="list">
+      <a href="{{ url_for('main.index') }}" role="listitem">Home</a>
+      <a href="#features" role="listitem">Features</a>
+      <a href="#how-it-works" role="listitem">How It Works</a>
+      <a href="#about" role="listitem">About</a>
+    </div>
+
+    <div class="navbar-actions">
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Sign Up</a>
+    </div>
+  </div>
+</nav>
+
+{# Flash messages (from base) appear here automatically #}
+
+{# ═══════════════════════════════════════════════
+   HERO SECTION
+   ═══════════════════════════════════════════════ #}
+<section class="hero" id="home" aria-labelledby="hero-heading">
+  <div class="hero-grid">
+
+    {# Left: text content #}
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span>⚡</span> AI Powered &bull; Free &bull; Easy to Use
+      </div>
+
+      <h1 id="hero-heading">
+        Build a Better<br>Resume <span class="highlight">with AI</span>
+      </h1>
+
+      <p class="hero-description">
+        Upload your resume and a job description to discover your strengths,
+        identify skill gaps, and improve your chances of getting hired.
+      </p>
+
+      <div class="hero-actions">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg">
+            Go to Dashboard
+          </a>
+        {% else %}
+          <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg" id="hero-get-started">
+            Get Started
+          </a>
+        {% endif %}
+        <a href="#features" class="btn btn-outline btn-lg">Learn More</a>
+      </div>
+    </div>
+
+    {# Right: decorative resume preview (purely illustrative — not real analysis data) #}
+    <div class="hero-illustration" aria-hidden="true" role="presentation">
+      <div class="resume-card-demo">
+        <div class="score-ring-demo">
+          <span class="score-val">78%</span>
+          <span class="score-lbl">Match<br>Score</span>
+        </div>
+
+        <div class="demo-resume-lines">
+          <div class="demo-line long"></div>
+          <div class="demo-line medium"></div>
+          <div class="demo-line short"></div>
+          <div class="demo-line long"></div>
+          <div class="demo-line medium"></div>
+        </div>
+
+        <div class="demo-section-title">Matching Skills</div>
+        <div class="demo-skill-row"><div class="demo-dot green"></div><span class="demo-skill-text">Python</span></div>
+        <div class="demo-skill-row"><div class="demo-dot green"></div><span class="demo-skill-text">Machine Learning</span></div>
+        <div class="demo-skill-row"><div class="demo-dot green"></div><span class="demo-skill-text">SQL</span></div>
+
+        <div class="demo-section-title" style="margin-top:1rem;">Missing Skills</div>
+        <div class="demo-skill-row"><div class="demo-dot red"></div><span class="demo-skill-text">Docker</span></div>
+        <div class="demo-skill-row"><div class="demo-dot red"></div><span class="demo-skill-text">Kubernetes</span></div>
+        <div class="demo-skill-row"><div class="demo-dot red"></div><span class="demo-skill-text">AWS</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{# ═══════════════════════════════════════════════
+   FEATURES SECTION
+   ═══════════════════════════════════════════════ #}
+<section class="section" id="features" aria-labelledby="features-heading">
+  <div class="container text-center">
+    <span class="section-label">Features</span>
+    <h2 class="section-heading" id="features-heading">Everything You Need to Stand Out</h2>
+    <p class="section-subheading">
+      ResumeAI gives you deep, actionable insights so you can tailor your resume
+      with confidence for every application.
+    </p>
+
+    <div class="feature-grid">
+      <article class="feature-card card-hover">
+        <div class="feature-icon lavender" aria-hidden="true">⚡</div>
+        <h3>Instant Analysis</h3>
+        <p>Understand how your resume aligns with a job description in seconds — no waiting, no guesswork.</p>
+      </article>
+
+      <article class="feature-card card-hover">
+        <div class="feature-icon pink" aria-hidden="true">🎯</div>
+        <h3>Identify Missing Skills</h3>
+        <p>Discover important skills that are missing or not clearly demonstrated, so you know exactly where to focus.</p>
+      </article>
+
+      <article class="feature-card card-hover">
+        <div class="feature-icon mint" aria-hidden="true">✨</div>
+        <h3>Personalized Suggestions</h3>
+        <p>Receive practical, actionable recommendations to strengthen your resume for the specific role.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+{# ═══════════════════════════════════════════════
+   HOW IT WORKS SECTION
+   ═══════════════════════════════════════════════ #}
+<section class="section" id="how-it-works" style="background: var(--bg-lavender);" aria-labelledby="how-heading">
+  <div class="container text-center">
+    <span class="section-label">How It Works</span>
+    <h2 class="section-heading" id="how-heading">Three Simple Steps</h2>
+    <p class="section-subheading">
+      From upload to insights in under a minute.
+    </p>
+
+    <div class="steps-grid">
+      <div class="text-center">
+        <div class="step-number" aria-label="Step 1">1</div>
+        <h3>Upload Your Resume</h3>
+        <p>Upload your resume as a PDF or DOCX file. We extract the text securely and discard the file after analysis.</p>
+      </div>
+
+      <div class="text-center">
+        <div class="step-number" aria-label="Step 2">2</div>
+        <h3>Add a Job Description</h3>
+        <p>Paste the job posting you're targeting. The more detail the better — include responsibilities and requirements.</p>
+      </div>
+
+      <div class="text-center">
+        <div class="step-number" aria-label="Step 3">3</div>
+        <h3>Review Your Analysis</h3>
+        <p>Get your match score, skill gaps, strengths, and concrete next steps tailored to your target role.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ═══════════════════════════════════════════════
+   ABOUT SECTION
+   ═══════════════════════════════════════════════ #}
+<section class="section" id="about" aria-labelledby="about-heading">
+  <div class="container">
+    <div class="about-content text-center">
+      <span class="section-label">About</span>
+      <h2 class="section-heading" id="about-heading">What Is ResumeAI?</h2>
+      <p style="font-size:1rem; line-height:1.8; color:var(--text-secondary); max-width:640px; margin:0 auto;">
+        ResumeAI is an open-source portfolio project that demonstrates how modern
+        generative AI can help job seekers understand their resume's strengths and
+        weaknesses relative to a specific job description.
+        It is powered by Google Gemini and built with Python and Flask.
+        ResumeAI does not replace professional career advice — it is a tool to help
+        you ask better questions about your own resume.
+      </p>
+    </div>
+  </div>
+</section>
+
+{# ═══════════════════════════════════════════════
+   PRIVACY SECTION
+   ═══════════════════════════════════════════════ #}
+<section class="section-sm" style="background: var(--bg-page);">
+  <div class="container">
+    <div class="privacy-box">
+      <h3 style="margin-bottom:0.75rem;">🔒 Your Privacy Matters</h3>
+      <p>
+        When you upload a resume, ResumeAI extracts the text and sends it to the
+        Google Gemini API to perform the analysis.  The uploaded file is read into
+        memory and is not stored on our servers.  Only the analysis results are
+        saved to your account.
+      </p>
+      <p style="margin-bottom:0;">
+        <strong>Please avoid uploading documents that contain unnecessary sensitive
+        personal information</strong> such as national ID numbers, financial details,
+        or medical information.  A resume should contain only what you would
+        comfortably share with a prospective employer.
+      </p>
+    </div>
+  </div>
+</section>
+
+{# ═══════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════ #}
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">
+          <div class="footer-brand-icon" aria-hidden="true">🍃</div>
+          ResumeAI
+        </div>
+        <p>An AI-powered resume analysis tool that helps you identify strengths, skill gaps, and actionable improvements.</p>
+      </div>
+
+      <div>
+        <p class="footer-title">Navigation</p>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="{{ url_for('main.index') }}">Home</a>
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#about">About</a>
+          <a href="{{ url_for('auth.login') }}">Sign In</a>
+          <a href="{{ url_for('auth.register') }}">Sign Up</a>
+        </nav>
+      </div>
+
+      <div>
+        <p class="footer-title">Privacy</p>
+        <p style="font-size:0.8rem;">
+          Resume text is processed via the Gemini API to provide analysis.
+          Uploaded files are not stored permanently.
+          Analysis results are saved to your account only.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© {{ now.year }} ResumeAI — A portfolio project</span>
+      <span>Built with Python, Flask &amp; Google Gemini</span>
+    </div>
+  </div>
+</footer>
+
+{% endblock %}

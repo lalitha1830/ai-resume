@@ -1,0 +1,45 @@
+# Git ignore rules for ResumeAI
+
+# Python virtual environment
+venv/
+.venv/
+env/
+.env/
+
+# Environment secrets — NEVER commit these
+.env
+
+# SQLite database (may contain personal user data)
+instance/
+*.db
+*.sqlite3
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.pytest_cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary upload files and local resumes
+uploads/
+tmp/
+*.pdf
+*.docx
+*.doc
+*.log
+
+# Build artefacts
+dist/
+build/
+*.egg-info/

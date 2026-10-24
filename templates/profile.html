@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+
+  <aside class="sidebar" aria-label="Application navigation">
+    <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">
+      <div class="brand-icon" aria-hidden="true">🍃</div>
+      ResumeAI
+    </a>
+    <nav class="sidebar-nav" aria-label="Main menu">
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.dashboard') }}" class="sidebar-link"><span class="icon" aria-hidden="true">🏠</span> Dashboard</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('analysis.new_analysis') }}" class="sidebar-link"><span class="icon" aria-hidden="true">✚</span> New Analysis</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.history') }}" class="sidebar-link"><span class="icon" aria-hidden="true">🕐</span> History</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.profile') }}" class="sidebar-link active"><span class="icon" aria-hidden="true">👤</span> Profile</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-help">
+        <p><strong>Need help?</strong></p>
+        <p>Check the README for tips.</p>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm" style="margin-top:0.5rem;width:100%;color:var(--error);">Sign Out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>Profile</h1>
+        <p>Your account information.</p>
+      </div>
+      <div class="topbar-user">
+        <div class="user-avatar" title="{{ current_user.full_name }}">{{ current_user.first_name[0].upper() }}</div>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Sign Out</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div style="max-width:560px;">
+
+        {# Profile card #}
+        <div class="card card-lg" style="margin-bottom:1.5rem;">
+          <div style="display:flex; align-items:center; gap:1.25rem; margin-bottom:1.75rem;">
+            <div class="user-avatar" style="width:64px; height:64px; font-size:1.5rem; flex-shrink:0;">
+              {{ current_user.first_name[0].upper() }}
+            </div>
+            <div>
+              <h2 style="font-size:1.3rem; margin-bottom:0.15rem;">{{ current_user.full_name }}</h2>
+              <p style="margin:0; font-size:0.88rem; color:var(--text-secondary);">{{ current_user.email }}</p>
+            </div>
+          </div>
+
+          <hr style="border:none; border-top:1px solid var(--border); margin-bottom:1.5rem;" />
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div>
+              <p style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-secondary); margin-bottom:0.25rem;">Full Name</p>
+              <p style="font-weight:600; color:var(--text-primary); font-size:0.9rem; margin:0;">{{ current_user.full_name }}</p>
+            </div>
+
+            <div>
+              <p style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-secondary); margin-bottom:0.25rem;">Email</p>
+              <p style="font-weight:600; color:var(--text-primary); font-size:0.9rem; margin:0; word-break:break-all;">{{ current_user.email }}</p>
+            </div>
+
+            <div>
+              <p style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-secondary); margin-bottom:0.25rem;">Member Since</p>
+              <p style="font-weight:600; color:var(--text-primary); font-size:0.9rem; margin:0;">
+                {{ current_user.created_at.strftime('%B %d, %Y') }}
+              </p>
+            </div>
+
+            <div>
+              <p style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-secondary); margin-bottom:0.25rem;">Total Analyses</p>
+              <p style="font-weight:600; color:var(--text-primary); font-size:0.9rem; margin:0;">{{ total_analyses }}</p>
+            </div>
+          </div>
+        </div>
+
+        {# Account actions #}
+        <div class="card" style="background:var(--error-bg); border-color:rgba(231, 131, 145, 0.2);">
+          <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">Sign Out</h3>
+          <p style="font-size:0.85rem; margin-bottom:1rem;">
+            Sign out of your ResumeAI account on this device.
+          </p>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm" id="profile-logout-btn">Sign Out</a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

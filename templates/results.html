@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% block title %}Analysis Results — {{ analysis.display_title }}{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+
+  {# ═══════ SIDEBAR ═══════ #}
+  <aside class="sidebar" aria-label="Application navigation">
+    <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">
+      <div class="brand-icon" aria-hidden="true">🍃</div>
+      ResumeAI
+    </a>
+    <nav class="sidebar-nav" aria-label="Main menu">
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.dashboard') }}" class="sidebar-link"><span class="icon" aria-hidden="true">🏠</span> Dashboard</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('analysis.new_analysis') }}" class="sidebar-link"><span class="icon" aria-hidden="true">✚</span> New Analysis</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.history') }}" class="sidebar-link active"><span class="icon" aria-hidden="true">🕐</span> History</a>
+      </div>
+      <div class="sidebar-section">
+        <a href="{{ url_for('main.profile') }}" class="sidebar-link"><span class="icon" aria-hidden="true">👤</span> Profile</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-help">
+        <p><strong>Need help?</strong></p>
+        <p>Check the README for tips on interpreting results.</p>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm" style="margin-top:0.5rem;width:100%;color:var(--error);">Sign Out</a>
+      </div>
+    </div>
+  </aside>
+
+  {# ═══════ MAIN CONTENT ═══════ #}
+  <main class="main-content" id="main">
+
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1 style="font-size:1.2rem;">Analysis Results</h1>
+        <p>{{ analysis.display_title }}</p>
+      </div>
+      <div class="topbar-user">
+        <div class="user-avatar" title="{{ current_user.full_name }}">{{ current_user.first_name[0].upper() }}</div>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Sign Out</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      {# Flash messages #}
+      {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+          <div role="alert" aria-live="polite" style="margin-bottom:1.25rem;">
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">
+                <span class="flash-icon">{% if category == 'success' %}✓{% elif category == 'error' %}✕{% else %}ℹ{% endif %}</span>
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {# Back link #}
+      <a href="{{ url_for('main.dashboard') }}" class="btn btn-ghost btn-sm" style="margin-bottom:1rem;">
+        ← Back to Dashboard
+      </a>
+
+      {# Results header card #}
+      <div class="results-header">
+        <h2 style="margin-bottom:0.25rem;">{{ analysis.display_title }}</h2>
+        <div class="results-meta">
+          {% if analysis.job_title %}
+            <span class="results-meta-item">🎯 {{ analysis.job_title }}</span>
+          {% endif %}
+          <span class="results-meta-item">📅 {{ analysis.formatted_date }}</span>
+          {% if analysis.match_score is not none %}
+            <span class="results-meta-item" style="color:var(--primary); font-weight:600;">
+              Score: {{ analysis.match_score }}%
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      {# Two-column layout: score sidebar + details #}
+      <div class="results-grid">
+
+        {# ── Score sidebar ── #}
+        <div class="results-sidebar">
+          <div class="card">
+            <h3 style="font-size:0.88rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-secondary); margin-bottom:1rem;">
+              Estimated Match
+            </h3>
+
+            <div class="score-circle-wrap">
+              <div class="score-circle {{ analysis.score_label }}" role="img"
+                   aria-label="Match score: {{ analysis.match_score|int if analysis.match_score else 'unavailable' }}%">
+                <span class="score-number">
+                  {% if analysis.match_score is not none %}
+                    {{ analysis.match_score|int }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </span>
+                <span class="score-percent">{% if analysis.match_score is not none %}%{% endif %}</span>
+              </div>
+              <p class="disclaimer-text">
+                <strong>Estimated Resume–Job Match</strong><br>
+                {{ score_description }}
+              </p>
+              <p class="disclaimer-text" style="margin-top:0.5rem;">
+                This score is an approximate comparison based on the supplied resume
+                and job description. It is not an official ATS score or a guarantee
+                of selection.
+              </p>
+            </div>
+
+            <hr style="border:none; border-top:1px solid var(--border); margin:1rem 0;" />
+
+            <div style="font-size:0.78rem; color:var(--text-light);">
+              <p style="margin-bottom:0.25rem;"><strong>Score methodology:</strong></p>
+              <ul style="list-style:disc; padding-left:1rem; color:var(--text-light);">
+                <li>Skills match — 50%</li>
+                <li>Experience alignment — 30%</li>
+                <li>Qualifications — 20%</li>
+              </ul>
+            </div>
+
+            <div style="margin-top:1.25rem;">
+              <a href="{{ url_for('analysis.new_analysis') }}" class="btn btn-primary btn-full btn-sm">
+                New Analysis
+              </a>
+              <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline btn-full btn-sm mt-1">
+                Dashboard
+              </a>
+              <a href="{{ url_for('analysis.delete_analysis', analysis_id=analysis.id) }}"
+                 class="btn btn-danger btn-full btn-sm mt-1"
+                 id="delete-analysis-btn"
+                 aria-label="Delete this analysis">
+                Delete Analysis
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {# ── Main detail sections ── #}
+        <div class="results-main">
+
+          {# Summary #}
+          {% if analysis_data.summary %}
+          <div class="section-card">
+            <h3>📋 Executive Summary</h3>
+            <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.7;">
+              {{ analysis_data.summary }}
+            </p>
+          </div>
+          {% endif %}
+
+          {# Matching skills #}
+          {% if analysis_data.skills and analysis_data.skills.matching %}
+          <div class="section-card">
+            <h3>✅ Matching Skills</h3>
+            <div class="badge-list" role="list" aria-label="Matching skills">
+              {% for skill in analysis_data.skills.matching %}
+                <span class="badge badge-matching" role="listitem">✓ {{ skill }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {# Missing skills #}
+          {% if analysis_data.skills and analysis_data.skills.missing %}
+          <div class="section-card">
+            <h3>❌ Potentially Missing Skills</h3>
+            <p style="font-size:0.8rem; color:var(--text-light); margin-bottom:0.75rem;">
+              Skills mentioned in the job description that are not clearly demonstrated in your resume.
+              The absence of a skill in your resume does not mean you do not possess it.
+            </p>
+            <div class="badge-list" role="list" aria-label="Missing skills">
+              {% for skill in analysis_data.skills.missing %}
+                <span class="badge badge-missing" role="listitem">✕ {{ skill }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {# Uncertain skills #}
+          {% if analysis_data.skills and analysis_data.skills.uncertain %}
+          <div class="section-card">
+            <h3>❓ Skills That Could Not Be Fully Assessed</h3>
+            <div class="badge-list" role="list" aria-label="Uncertain skills">
+              {% for skill in analysis_data.skills.uncertain %}
+                <span class="badge badge-uncertain" role="listitem">? {{ skill }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {# Experience alignment #}
+          {% if analysis_data.experience_alignment %}
+          <div class="section-card">
+            <h3>💼 Experience Alignment</h3>
+            <ul>
+              {% for point in analysis_data.experience_alignment %}
+                <li>{{ point }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {# Strengths #}
+          {% if analysis_data.strengths %}
+          <div class="section-card" style="border-left:3px solid var(--success);">
+            <h3 style="color:var(--success);">💪 Resume Strengths</h3>
+            <ul>
+              {% for strength in analysis_data.strengths %}
+                <li style="color:var(--text-secondary);">{{ strength }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {# Areas for improvement #}
+          {% if analysis_data.improvements %}
+          <div class="section-card" style="border-left:3px solid var(--warning);">
+            <h3 style="color:var(--warning);">🔧 Areas for Improvement</h3>
+            <ul>
+              {% for item in analysis_data.improvements %}
+                <li style="color:var(--text-secondary);">{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {# Keywords #}
+          {% if analysis_data.keywords %}
+          <div class="section-card">
+            <h3>🔑 Keyword Analysis</h3>
+            {% if analysis_data.keywords.present %}
+              <p style="font-size:0.82rem; font-weight:600; margin-bottom:0.5rem; color:var(--text-primary);">
+                Present in your resume:
+              </p>
+              <div class="badge-list" style="margin-bottom:1rem;" role="list" aria-label="Keywords present">
+                {% for kw in analysis_data.keywords.present %}
+                  <span class="badge badge-keyword" role="listitem">{{ kw }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% if analysis_data.keywords.missing_or_weak %}
+              <p style="font-size:0.82rem; font-weight:600; margin-bottom:0.5rem; color:var(--text-primary);">
+                Missing or weakly demonstrated:
+              </p>
+              <div class="badge-list" role="list" aria-label="Missing keywords">
+                {% for kw in analysis_data.keywords.missing_or_weak %}
+                  <span class="badge badge-keyword-missing" role="listitem">{{ kw }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {# Recommendations #}
+          {% if analysis_data.recommendations %}
+          <div class="section-card" style="border-left:3px solid var(--primary); background:var(--bg-lavender);">
+            <h3 style="color:var(--primary);">🚀 Actionable Recommendations</h3>
+            <ul>
+              {% for rec in analysis_data.recommendations %}
+                <li style="color:var(--text-secondary);">{{ rec }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {# Bottom actions #}
+          <div class="flex gap-2" style="margin-top:0.5rem; flex-wrap:wrap;">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline">← Dashboard</a>
+            <a href="{{ url_for('analysis.new_analysis') }}" class="btn btn-primary">Start New Analysis</a>
+            <a href="{{ url_for('analysis.delete_analysis', analysis_id=analysis.id) }}"
+               class="btn btn-danger" id="delete-bottom-btn">Delete This Analysis</a>
+          </div>
+
+        </div>{# end results-main #}
+      </div>{# end results-grid #}
+
+    </div>{# end page-body #}
+  </main>
+</div>
+{% endblock %}

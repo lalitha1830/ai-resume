@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% block title %}New Analysis{% endblock %}
+
+{# Reusable sidebar macro to avoid duplicating sidebar HTML across every page #}
+{% macro sidebar(active='') %}
+<aside class="sidebar" aria-label="Application navigation">
+  <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">
+    <div class="brand-icon" aria-hidden="true">🍃</div>
+    ResumeAI
+  </a>
+  <nav class="sidebar-nav" aria-label="Main menu">
+    <div class="sidebar-section">
+      <a href="{{ url_for('main.dashboard') }}" class="sidebar-link {% if active=='dashboard' %}active{% endif %}">
+        <span class="icon" aria-hidden="true">🏠</span> Dashboard
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <a href="{{ url_for('analysis.new_analysis') }}" class="sidebar-link {% if active=='analyze' %}active{% endif %}">
+        <span class="icon" aria-hidden="true">✚</span> New Analysis
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <a href="{{ url_for('main.history') }}" class="sidebar-link {% if active=='history' %}active{% endif %}">
+        <span class="icon" aria-hidden="true">🕐</span> History
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <a href="{{ url_for('main.profile') }}" class="sidebar-link {% if active=='profile' %}active{% endif %}">
+        <span class="icon" aria-hidden="true">👤</span> Profile
+      </a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-help">
+      <p><strong>Need help?</strong></p>
+      <p>Check the README for setup instructions and tips.</p>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm" style="margin-top:0.5rem;width:100%;color:var(--error);">Sign Out</a>
+    </div>
+  </div>
+</aside>
+{% endmacro %}
+
+{% block content %}
+<div class="app-layout">
+
+  {{ sidebar('analyze') }}
+
+  <main class="main-content" id="main">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>New Analysis</h1>
+        <p>Compare your resume to a job description.</p>
+      </div>
+      <div class="topbar-user">
+        <div class="user-avatar" title="{{ current_user.full_name }}">{{ current_user.first_name[0].upper() }}</div>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Sign Out</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      {# Flash messages #}
+      {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+          <div role="alert" aria-live="polite" style="margin-bottom:1.5rem;">
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">
+                <span class="flash-icon">{% if category == 'success' %}✓{% elif category == 'error' %}✕{% else %}ℹ{% endif %}</span>
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <div style="max-width:720px;">
+        <h2 style="margin-bottom:0.4rem;">Let's Analyze Your Resume</h2>
+        <p style="margin-bottom:2rem;">
+          Compare your experience with your target job and discover where you can improve.
+          Supported formats: <strong>PDF</strong>, <strong>DOCX</strong>, and <strong>JSON</strong>. No file size limit.
+        </p>
+
+        <form method="POST"
+              action="{{ url_for('analysis.new_analysis') }}"
+              enctype="multipart/form-data"
+              novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+          {# Optional analysis label #}
+          <div class="form-group">
+            <label class="form-label" for="analysis_title">
+              Analysis label <span style="color:var(--text-light); font-weight:400;">(optional)</span>
+            </label>
+            <input
+              class="form-control"
+              type="text"
+              id="analysis_title"
+              name="analysis_title"
+              placeholder="e.g. Software Engineer at Acme Corp"
+              maxlength="200"
+              value="{{ form_data.get('analysis_title', '') }}"
+              aria-label="Optional analysis label"
+            />
+            <p class="form-hint">Give this analysis a memorable name to find it easily later.</p>
+          </div>
+
+          {# Job title #}
+          <div class="form-group">
+            <label class="form-label" for="job_title">
+              Target job title <span style="color:var(--text-light); font-weight:400;">(optional)</span>
+            </label>
+            <input
+              class="form-control"
+              type="text"
+              id="job_title"
+              name="job_title"
+              placeholder="e.g. Data Scientist"
+              maxlength="200"
+              value="{{ form_data.get('job_title', '') }}"
+              aria-label="Target job title"
+            />
+          </div>
+
+          {# Resume file upload #}
+          <div class="form-group">
+            <label class="form-label" for="resume_file">
+              Upload your resume <span style="color:var(--error);">*</span>
+            </label>
+
+            {# ── Upload drop-zone ── #}
+            <div class="upload-zone" id="upload-zone" role="button" tabindex="0"
+                 aria-label="Upload resume file — PDF, DOCX, or JSON. Click or drag a file here.">
+              <input
+                type="file"
+                id="resume_file"
+                name="resume_file"
+                accept=".pdf,.docx,.json"
+                required
+                aria-label="Choose resume file"
+              />
+              <div class="upload-icon" id="upload-icon" aria-hidden="true">📄</div>
+              <p class="upload-title" id="upload-title">Click to upload your resume</p>
+              <p class="upload-sub" id="upload-sub">PDF · DOCX · JSON · No file size limit</p>
+            </div>
+
+            {# ── File preview card (hidden until a file is selected) ── #}
+            <div class="file-preview" id="file-preview" aria-live="polite" aria-label="Selected file">
+              <div class="file-preview-icon" id="file-preview-icon" aria-hidden="true">📄</div>
+              <div class="file-preview-info">
+                <div class="file-preview-name" id="file-preview-name">—</div>
+                <div class="file-preview-meta" id="file-preview-meta">—</div>
+              </div>
+              <button type="button" class="file-preview-clear" id="file-preview-clear"
+                      title="Remove file" aria-label="Remove selected file">✕</button>
+            </div>
+
+            <p class="form-hint">
+              ⚠ If your PDF was created by scanning a paper document (image-only),
+              text extraction may fail. Use a PDF with machine-readable text, or convert to DOCX.
+              JSON format works great for LinkedIn data exports.
+            </p>
+          </div>
+
+          {# ── JavaScript: show file info immediately after selection ── #}
+          <script>
+          (function () {
+            var input   = document.getElementById('resume_file');
+            var zone    = document.getElementById('upload-zone');
+            var icon    = document.getElementById('upload-icon');
+            var title   = document.getElementById('upload-title');
+            var sub     = document.getElementById('upload-sub');
+            var preview = document.getElementById('file-preview');
+            var prevIcon= document.getElementById('file-preview-icon');
+            var prevName= document.getElementById('file-preview-name');
+            var prevMeta= document.getElementById('file-preview-meta');
+            var clearBtn= document.getElementById('file-preview-clear');
+
+            /* Map extension → emoji icon */
+            var iconMap = { pdf: '📕', docx: '📘', doc: '📘', json: '📗' };
+
+            /* Format bytes as KB / MB */
+            function fmtSize(bytes) {
+              if (bytes < 1024) return bytes + ' B';
+              if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+              return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+
+            function showFile(file) {
+              var ext  = file.name.split('.').pop().toLowerCase();
+              var eico = iconMap[ext] || '📄';
+
+              /* Update upload zone */
+              zone.classList.add('has-file');
+              icon.textContent  = '✅';
+              title.textContent = 'File selected';
+              sub.textContent   = 'Click to change';
+
+              /* Update preview card */
+              prevIcon.textContent = eico;
+              prevName.textContent = file.name;
+              prevMeta.textContent = fmtSize(file.size) + '  ·  ' + ext.toUpperCase();
+              preview.classList.add('visible');
+            }
+
+            function clearFile() {
+              input.value = '';
+              zone.classList.remove('has-file');
+              icon.textContent  = '📄';
+              title.textContent = 'Click to upload your resume';
+              sub.textContent   = 'PDF · DOCX · JSON · No file size limit';
+              preview.classList.remove('visible');
+            }
+
+            input.addEventListener('change', function () {
+              if (input.files && input.files.length > 0) {
+                showFile(input.files[0]);
+              } else {
+                clearFile();
+              }
+            });
+
+            clearBtn.addEventListener('click', function (e) {
+              e.stopPropagation(); /* prevent re-opening the file picker */
+              clearFile();
+            });
+          })();
+          </script>
+
+
+          {# Job description #}
+          <div class="form-group">
+            <label class="form-label" for="job_description">
+              Job description <span style="color:var(--error);">*</span>
+            </label>
+            <textarea
+              class="form-control"
+              id="job_description"
+              name="job_description"
+              placeholder="Paste the full job description here — include responsibilities, required skills, and qualifications for the best analysis."
+              rows="10"
+              maxlength="8000"
+              required
+              aria-label="Job description"
+              aria-describedby="jd-hint"
+            >{{ form_data.get('job_description', '') }}</textarea>
+            <p class="form-hint" id="jd-hint">
+              Maximum 8,000 characters.
+              Include the full job posting for the most accurate analysis.
+            </p>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" id="analyze-submit-btn" style="margin-top:0.5rem;">
+            🔍 Analyze My Resume
+          </button>
+
+          <p style="font-size:0.78rem; color:var(--text-light); margin-top:0.75rem;">
+            This may take 10–30 seconds while the AI processes your documents.
+          </p>
+        </form>
+      </div>
+
+    </div>
+  </main>
+</div>
+{% endblock %}

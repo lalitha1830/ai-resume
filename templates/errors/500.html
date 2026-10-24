@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>500 — Server Error | ResumeAI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <main class="error-page">
+    <div class="error-code" aria-hidden="true">500</div>
+    <h1>Something Went Wrong</h1>
+    <p style="color:var(--text-secondary); max-width:480px; margin:0 auto 2rem;">
+      We encountered an unexpected error. This has been logged and we'll look into it.
+      Please try again in a moment.
+    </p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+      <a href="{{ url_for('main.index') }}" class="btn btn-outline">Home Page</a>
+    </div>
+  </main>
+</body>
+</html>

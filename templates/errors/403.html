@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>403 — Access Denied | ResumeAI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <main class="error-page">
+    <div class="error-code" aria-hidden="true">403</div>
+    <h1>Access Denied</h1>
+    <p style="color:var(--text-secondary); max-width:400px; margin:0 auto 2rem;">
+      You don't have permission to access this page. You may be trying to view
+      another user's analysis.
+    </p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+      <a href="{{ url_for('main.index') }}" class="btn btn-outline">Home Page</a>
+    </div>
+  </main>
+</body>
+</html>
